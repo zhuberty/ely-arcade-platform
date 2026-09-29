@@ -33,7 +33,7 @@ Each project downloads raylib on first build (into its own `build/external/`).
 
 ## Adding a game
 
-1. Create the game repo from the same layout as `game-thick-cube` (`sdk/` submodule, `build/premake5.lua` calling `ely.app_project`, `resources/`).
+1. Create the game repo from the same layout as `game-thick-cube` (`sdk/` submodule, `build/premake5.lua` calling `arcade.app_project`, `resources/`).
 2. `git submodule add <url> games/<name>`
 3. Add an entry to `GAMES[]` in `src/main.cpp` (path is `games/<name>/bin/Release/<name>`).
 

@@ -169,13 +169,13 @@ int main(void)
         float now = (float)GetTime();
 
         // Input
-        if (ely::IsActionPressed(ely::Player::Any, ely::Action::Down))
+        if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Down))
             selectedIndex = (selectedIndex + 1) % GAME_COUNT;
 
-        if (ely::IsActionPressed(ely::Player::Any, ely::Action::Up))
+        if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Up))
             selectedIndex = (selectedIndex - 1 + GAME_COUNT) % GAME_COUNT;
 
-        if (ely::IsActionPressed(ely::Player::Any, ely::Action::Confirm))
+        if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Confirm))
             LaunchGame(GAMES[selectedIndex]);
             // After game exits, execution resumes here and the loop continues
 
