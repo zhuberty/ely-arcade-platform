@@ -1,0 +1,9 @@
+[submodule "sdk"]
+	path = sdk
+	url = git@github.com:zhuberty/ely-arcade-sdk.git
+[submodule "games/game-thick-cube"]
+	path = games/game-thick-cube
+	url = git@github.com:zhuberty/game-thick-cube.git
+[submodule "games/edibles-raylib"]
+	path = games/edibles-raylib
+	url = git@github.com:zhuberty/edibles-raylib.git

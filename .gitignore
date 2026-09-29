@@ -1,0 +1,11 @@
+bin/
+obj/
+build_files/
+external/
+Makefile
+*.make
+.vs/
+*.sln
+*.vcxproj*
+compile_commands.json
+.env
