@@ -142,12 +142,114 @@ For a game, do the same inside `games/<game>/`, and run gdb from that folder so 
 | Undefined references to `winmm`, `gdi32`, `X11`, etc. | OS libraries are set in `arcade.link_system_libs` in `sdk/premake/arcade_sdk.lua`. |
 | Game runs but has no textures, fonts, or sounds | The working directory isn't the game's folder. |
 | A game is missing from the menu | It isn't in `GAMES[]` in `src/main.cpp`, or its Release binary isn't built. |
+| A game is in the menu but won't launch | Its `GAMES[]` path doesn't match the binary name, it was built in Debug only, or the submodule isn't checked out. |
+| `scripts/build-all` skips a game | The game has no `build/` folder. |
+| ESC doesn't return to the menu | The game doesn't call `SetExitKey(KEY_ESCAPE)`. |
 
 ## Adding a game
 
-1. Create the game repo from the same layout as `game-thick-cube` (`sdk/` submodule, `build/premake5.lua` calling `arcade.app_project`, `resources/`).
-2. `git submodule add <url> games/<name>`
-3. Add an entry to `GAMES[]` in `src/main.cpp` (path is `games/<name>/bin/Release/<name>`).
+### 1. Create the game repo
+
+Layout (same as `game-thick-cube`):
+
+```
+<name>/
+├── sdk/                   <- submodule of ely-arcade-sdk
+├── build/premake5.lua
+├── resources/             <- fonts, textures, sounds
+├── src/main.cpp           <- every .cpp/.c/.h under src/ is built automatically
+└── .gitignore             <- bin/ obj/ build_files/ external/ Makefile *.make
+```
+
+```
+git init <name> && cd <name>
+git submodule add git@github.com:zhuberty/ely-arcade-sdk.git sdk
+mkdir build src resources
+```
+
+`build/premake5.lua` (replace `<name>` with the repo name; the binary gets this name):
+
+```lua
+dofile("../sdk/premake/arcade_sdk.lua")
+
+arcade.prepare_dirs()
+arcade.workspace("<name>")
+arcade.raylib_project()
+arcade.sdk_project("../sdk")
+arcade.app_project("<name>", "../src", "../sdk")
+```
+
+Optionally copy `build.sh` / `build.bat` from `game-thick-cube` to build just this game.
+
+### 2. Write `src/main.cpp`
+
+Minimal skeleton:
+
+```cpp
+#include "raylib.h"
+#include "resource_dir.h"
+#include "arcade_input.h"
+
+int main(void)
+{
+    SetConfigFlags(FLAG_FULLSCREEN_MODE);
+    InitWindow(0, 0, "My Game");   // 0,0 = monitor native resolution
+    SetExitKey(KEY_ESCAPE);        // ESC quits the game and returns to the menu
+    SetTargetFPS(60);
+
+    SearchAndSetResourceDir("resources");
+
+    while (!WindowShouldClose())
+    {
+        if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Confirm)) { /* ... */ }
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText("Hello, arcade", 100, 100, 40, WHITE);
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
+}
+```
+
+What the menu expects from a game:
+
+- **Exit cleanly.** The menu launches the game as a child process and waits for it. Call `SetExitKey(KEY_ESCAPE)` and return from `main` (after `CloseWindow()`) so control goes back to the menu. The menu itself disables ESC, so a game is the only place ESC exits.
+- **Use `arcade_input.h`** rather than raw keys, so the game works with the keyboard, gamepads, and the cabinet's encoders. Use `Player::One` / `Player::Two` for two-player games and `Player::Any` for menus and single player. Actions: Up, Down, Left, Right, Confirm, Back, Restart. See `sdk/include/arcade_input.h` for the key and gamepad bindings.
+- **Load assets by relative path.** The menu sets the working directory to the game's folder. `SearchAndSetResourceDir("resources")` then makes paths like `"fonts/x.ttf"` resolve to `resources/fonts/x.ttf`.
+- **Name the binary after the folder** (`games/<name>/bin/Release/<name>`). The menu uses that path.
+
+### 3. Build and test the game alone
+
+```
+cd build && ../sdk/tools/premake/premake5 gmake     # Windows: ..\sdk\tools\premake\premake5.exe gmake
+cd .. && make config=release_x64                    # Windows: mingw32-make
+bin/Release/<name>
+```
+
+### 4. Push the repo, then add it here
+
+```
+git submodule add <url> games/<name>
+```
+
+### 5. Register it in the menu
+
+Add an entry to `GAMES[]` in `src/main.cpp`:
+
+```cpp
+{
+    "My Game",
+    "One-line description.",
+    "games/<name>/bin/Release/<name>" GAME_EXE_EXT
+},
+```
+
+### 6. Build everything and commit
+
+Run `scripts/build-all.sh` (or `.bat`). It builds every `games/*` folder that has a `build/` directory. Start the menu, launch the game, and press ESC to check that it returns. Then commit `.gitmodules`, `games/<name>`, and `src/main.cpp` in this repo.
 
 ## Where to change build settings
 
@@ -165,7 +267,8 @@ All of these live in `sdk/premake/arcade_sdk.lua`, so a change there applies to 
 ## Updating
 
 - Bump a game: `git -C games/<name> pull origin main`, then commit the new pointer here.
-- Bump the SDK for a game: pull inside `games/<name>/sdk`, commit in the game repo, push, then bump the game here.
+- Bump the SDK for a game: pull inside `games/<name>/sdk`, commit the new SDK pointer in the game repo, push, then bump the game here. Skipping the push or the final commit here leaves the platform pointing at the old version.
+- `docs/ARCADE_SETUP_PLAN.md` is a historical record of the machine setup. Its "Adding a real game later" steps (`define_game_project`) are outdated. Use "Adding a game" above.
 
 ## Notes
 
