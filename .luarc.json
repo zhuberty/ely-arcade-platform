@@ -1,0 +1,12 @@
+{
+  "runtime.version": "Lua 5.3",
+  "workspace.library": ["sdk/premake/luals"],
+  "workspace.ignoreDir": [
+    "build/external",
+    "games/*/build/external",
+    "games/*/sdk",
+    "bin",
+    ".git"
+  ],
+  "diagnostics.globals": ["arcade"]
+}
