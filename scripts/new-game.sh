@@ -119,6 +119,7 @@ Next steps:
   1. Build and test:  cd "$DEST" && ./build.sh && bin/Release/$NAME
   2. Create a GitHub repo, then:  git remote add origin <url> && git push -u origin main
   3. In the platform repo:  git submodule add <url> games/$NAME
+                            git submodule update --init --recursive games/$NAME
   4. Add to GAMES[] in src/main.cpp:
        { "$NAME", "Description.", "games/$NAME/bin/Release/$NAME" GAME_EXE_EXT },
 EOF

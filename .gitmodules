@@ -7,3 +7,6 @@
 [submodule "games/edibles-raylib"]
 	path = games/edibles-raylib
 	url = git@github.com:zhuberty/edibles-raylib.git
+[submodule "games/ely-arcade-map-browser"]
+	path = games/ely-arcade-map-browser
+	url = git@github.com:zhuberty/ely-arcade-map-browser.git

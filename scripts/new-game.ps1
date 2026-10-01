@@ -137,6 +137,7 @@ Next steps:
   1. Build and test:  cd "$Dest"; .\build.bat; bin\Release\$Name.exe
   2. Create a GitHub repo, then:  git remote add origin <url>; git push -u origin main
   3. In the platform repo:  git submodule add <url> games/$Name
+                            git submodule update --init --recursive games/$Name
   4. Add to GAMES[] in src/main.cpp:
        { "$Name", "Description.", "games/$Name/bin/Release/$Name" GAME_EXE_EXT },
 "@

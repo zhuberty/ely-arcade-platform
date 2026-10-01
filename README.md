@@ -246,7 +246,11 @@ bin/Release/<name>
 
 ```
 git submodule add <url> games/<name>
+git submodule update --init --recursive games/<name>   # checks out the game's own sdk/
 ```
+
+Skipping the second command leaves `games/<name>/sdk/` empty, and the build
+fails with "The system cannot find the path specified."
 
 ### 5. Register it in the menu
 

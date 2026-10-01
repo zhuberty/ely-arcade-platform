@@ -57,6 +57,11 @@ static const GameEntry GAMES[] =
         "A snake game for one or two players.",
         "games/edibles-raylib/bin/Release/edibles-raylib" GAME_EXE_EXT
     },
+    {
+        "Map Browser",
+        "Preview a Tiled-based game map.",
+        "games/ely-arcade-map-browser/bin/Release/ely-arcade-map-browser" GAME_EXE_EXT
+    },
 };
 static const int GAME_COUNT = (int)(sizeof(GAMES) / sizeof(GAMES[0]));
 
