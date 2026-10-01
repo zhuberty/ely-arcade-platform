@@ -148,6 +148,19 @@ For a game, do the same inside `games/<game>/`, and run gdb from that folder so 
 
 ## Adding a game
 
+### Quick start: the generator script
+
+```
+scripts/new-game.sh <name>        # Linux / macOS / Git Bash
+scripts\new-game.ps1 <name>       # Windows PowerShell
+```
+
+`<name>` is lowercase letters, digits and single hyphens (e.g. `space-blasters`). The script creates
+`<parent of this repo>/ely-arcade-games/<name>/` (making `ely-arcade-games/` if needed) with everything
+from step 1 and a starter `main.cpp` from step 2, runs `git init`, and adds the SDK submodule (this needs
+SSH access to GitHub; if it fails, the script prints the command to run later). It prints the remaining
+steps (3-6 below) when it finishes. Steps 1 and 2 describe what it generates.
+
 ### 1. Create the game repo
 
 Layout (same as `game-thick-cube`):
