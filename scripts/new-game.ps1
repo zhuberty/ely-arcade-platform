@@ -15,7 +15,7 @@ $SdkUrl = 'git@github.com:zhuberty/ely-arcade-sdk.git'
 if (Test-Path $Dest) { Write-Error "$Dest already exists." }
 
 New-Item -ItemType Directory -Force -Path $GamesDir | Out-Null
-foreach ($d in 'build', 'src', 'resources') {
+foreach ($d in 'build', 'src', 'resources', '.vscode') {
     New-Item -ItemType Directory -Force -Path (Join-Path $Dest $d) | Out-Null
 }
 
@@ -112,6 +112,31 @@ Write-File '.luarc.json' @'
   "workspace.library": ["sdk/premake/luals"],
   "workspace.ignoreDir": ["build/external", "bin", ".git"],
   "diagnostics.globals": ["arcade"]
+}
+'@
+
+Write-File '.vscode\c_cpp_properties.json' @'
+{
+    "configurations": [
+        {
+            "name": "Default",
+            "includePath": [
+                "${workspaceFolder}/sdk/include/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/build/external/raylib-master/src"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "GRAPHICS_API_OPENGL_33",
+                "PLATFORM_DESKTOP"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
 }
 '@
 

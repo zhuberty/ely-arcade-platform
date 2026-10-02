@@ -17,7 +17,7 @@ SDK_URL="git@github.com:zhuberty/ely-arcade-sdk.git"
 if [ -e "$DEST" ]; then echo "Error: $DEST already exists."; exit 1; fi
 
 mkdir -p "$GAMES_DIR"
-mkdir -p "$DEST/build" "$DEST/src" "$DEST/resources"
+mkdir -p "$DEST/build" "$DEST/src" "$DEST/resources" "$DEST/.vscode"
 cd "$DEST"
 
 cat > build/premake5.lua <<EOF
@@ -100,6 +100,31 @@ cat > .luarc.json <<'EOF'
   "workspace.library": ["sdk/premake/luals"],
   "workspace.ignoreDir": ["build/external", "bin", ".git"],
   "diagnostics.globals": ["arcade"]
+}
+EOF
+
+cat > .vscode/c_cpp_properties.json <<'EOF'
+{
+    "configurations": [
+        {
+            "name": "Default",
+            "includePath": [
+                "${workspaceFolder}/sdk/include/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/build/external/raylib-master/src"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "GRAPHICS_API_OPENGL_33",
+                "PLATFORM_DESKTOP"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
 }
 EOF
 
