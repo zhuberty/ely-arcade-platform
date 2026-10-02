@@ -4,8 +4,11 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/build/external/raylib-master/src/**",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/sdk/include/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/games/*/sdk/include/**",
+                "${workspaceFolder}/games/*/src/**",
+                "${workspaceFolder}/games/*/build/external/raylib-master/src"
             ],
             "defines": [
                 "_DEBUG",
@@ -22,8 +25,11 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/build/external/raylib-master/src/**",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/sdk/include/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/games/*/sdk/include/**",
+                "${workspaceFolder}/games/*/src/**",
+                "${workspaceFolder}/games/*/build/external/raylib-master/src"
             ],
             "defines": [
                 "_DEBUG",
@@ -44,8 +50,11 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/build/external/raylib-master/src/**",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/sdk/include/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/games/*/sdk/include/**",
+                "${workspaceFolder}/games/*/src/**",
+                "${workspaceFolder}/games/*/build/external/raylib-master/src"
             ],
             "defines": [
                 "_DEBUG",
@@ -63,3 +72,4 @@
     ],
     "version": 4
 }
+
