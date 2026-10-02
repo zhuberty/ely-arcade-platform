@@ -117,7 +117,7 @@ This `.vscode/` came from the raylib-quickstart template and hasn't been adapted
 1. **`UpdateMake` fails.** It runs `./premake5.exe` inside `build/`, but premake lives in `sdk/tools/premake/`. The template put a copy in `build/`, and this layout doesn't.
 2. **`Generate compile_commands.json` fails.** It runs the `ecc` premake action, which the bundled premake doesn't have (`Error: no such action 'ecc'`). `UpdateMake` depends on this task too.
 3. **Net effect:** **Debug** and **Run Release** fail in their pre-launch task. **Debug NoPremake** skips `UpdateMake`, so it can work once the Makefiles exist (run step 1 from the build section once).
-4. **Games have no `.vscode/`.** To debug a game, open it as its own VS Code folder with a copied `.vscode/`, or use gdb from a terminal.
+4. **Games have their own `.vscode/`.** `scripts/new-game.*` generates `c_cpp_properties.json`, `launch.json` and `tasks.json` in each new game, wired to `sdk/tools/premake/`. Open the game as its own VS Code folder and pick **Debug**, **Debug NoPremake** or **Run Release**. Games created before this change need these files copied in.
 5. **You can't debug a game through the menu.** The menu starts each game as a separate process and the debugger won't follow it. Debug the game directly.
 
 ### Debugging from a terminal (works today)
