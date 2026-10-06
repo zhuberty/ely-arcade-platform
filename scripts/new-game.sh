@@ -111,7 +111,8 @@ cat > .vscode/c_cpp_properties.json <<'EOF'
             "includePath": [
                 "${workspaceFolder}/sdk/include/**",
                 "${workspaceFolder}/src/**",
-                "${workspaceFolder}/build/external/raylib-master/src"
+                "${workspaceFolder}/build/external/raylib-master/src",
+                "${workspaceFolder}/build/external/raylib-master/src/external/glfw/include"
             ],
             "defines": [
                 "_DEBUG",

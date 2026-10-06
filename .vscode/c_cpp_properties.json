@@ -8,7 +8,8 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/games/*/sdk/include/**",
                 "${workspaceFolder}/games/*/src/**",
-                "${workspaceFolder}/games/*/build/external/raylib-master/src"
+                "${workspaceFolder}/games/*/build/external/raylib-master/src",
+                "${workspaceFolder}/games/*/build/external/raylib-master/src/external/glfw/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -29,7 +30,8 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/games/*/sdk/include/**",
                 "${workspaceFolder}/games/*/src/**",
-                "${workspaceFolder}/games/*/build/external/raylib-master/src"
+                "${workspaceFolder}/games/*/build/external/raylib-master/src",
+                "${workspaceFolder}/games/*/build/external/raylib-master/src/external/glfw/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -54,7 +56,8 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/games/*/sdk/include/**",
                 "${workspaceFolder}/games/*/src/**",
-                "${workspaceFolder}/games/*/build/external/raylib-master/src"
+                "${workspaceFolder}/games/*/build/external/raylib-master/src",
+                "${workspaceFolder}/games/*/build/external/raylib-master/src/external/glfw/include"
             ],
             "defines": [
                 "_DEBUG",
