@@ -1,7 +1,8 @@
 // Arcade Menu -- src/main.cpp
 //
 // Top-level launcher booted directly from LightDM.
-// Shows a navigable game list (Up/Down + Enter to launch).
+// Shows a navigable game list (joystick Up/Down to choose, any encoder button to launch;
+// the keyboard's W/S or arrow keys and Enter work too).
 // Each game is a separate binary launched as a child process via fork/exec.
 // The menu waits (waitpid) until the child exits, then returns to the list.
 // ESC inside a game exits that game binary and returns here automatically.
@@ -126,6 +127,28 @@ static void LaunchGame(const GameEntry& game)
 }
 
 // ---------------------------------------------------------------------------
+// Confirm ("launch the selected game")
+// The SDK has no Confirm action: its actions are only Up/Down/Left/Right, and the
+// encoder buttons are deliberately unassigned (each program decides what they
+// mean). In this menu ANY of the 8 buttons on either arcade encoder launches the
+// selected game. For development without the cabinet: Enter, Space or the keypad
+// Enter on the keyboard, and the A button on gamepads 0 and 1.
+// ---------------------------------------------------------------------------
+
+static bool ConfirmPressed()
+{
+    for (int button = 0; button < arcade::kEncoderButtonCount; ++button)
+        if (arcade::IsButtonPressed(arcade::Player::Any, button))
+            return true;
+
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_SPACE))
+        return true;
+
+    return IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ||
+           IsGamepadButtonPressed(1, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+}
+
+// ---------------------------------------------------------------------------
 // Pulsing highlight alpha -- sin wave, full cycle ~2 s
 // ---------------------------------------------------------------------------
 
@@ -173,14 +196,17 @@ int main(void)
     {
         float now = (float)GetTime();
 
-        // Input
+        // Input. UpdateInput() must run exactly once per frame, before any query: it is
+        // what makes "pressed" work for the encoder buttons.
+        arcade::UpdateInput();
+
         if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Down))
             selectedIndex = (selectedIndex + 1) % GAME_COUNT;
 
         if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Up))
             selectedIndex = (selectedIndex - 1 + GAME_COUNT) % GAME_COUNT;
 
-        if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Confirm))
+        if (ConfirmPressed())
             LaunchGame(GAMES[selectedIndex]);
             // After game exits, execution resumes here and the loop continues
 
@@ -254,7 +280,7 @@ int main(void)
         }
 
         // Footer control hints
-        const char* hintText = "UP / DOWN   navigate       ENTER   launch game";
+        const char* hintText = "JOYSTICK   choose       ANY BUTTON   launch game";
         Vector2 hintSize = MeasureTextEx(hintFont, hintText, 24, 1);
         DrawTextEx(hintFont, hintText,
                    { (W - hintSize.x) * 0.5f, (float)(H - 50) },
