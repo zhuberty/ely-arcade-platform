@@ -10,3 +10,6 @@
 [submodule "games/ely-arcade-map-browser"]
 	path = games/ely-arcade-map-browser
 	url = git@github.com:zhuberty/ely-arcade-map-browser.git
+[submodule "games/ely-arcade-wizards-1"]
+	path = games/ely-arcade-wizards-1
+	url = git@github.com:zhuberty/ely-arcade-wizards-1.git

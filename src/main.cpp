@@ -49,6 +49,12 @@ struct GameEntry
 static const GameEntry GAMES[] =
 {
     {
+        "Wizards",
+        "Explore the wizard's world.",
+        // The folder is ely-arcade-wizards-1, but the binary is named wizards1.
+        "games/ely-arcade-wizards-1/bin/Release/wizards1" GAME_EXE_EXT
+    },
+    {
         "Thick Cube",
         "A 3D cube with holes on every face.",
         "games/game-thick-cube/bin/Release/game-thick-cube" GAME_EXE_EXT
