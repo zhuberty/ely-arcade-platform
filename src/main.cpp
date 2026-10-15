@@ -31,6 +31,9 @@
 
 struct GameEntry
 {
+    // Heading shown above this game ("" = none). A heading is drawn whenever an entry's
+    // section differs from the previous entry's, so keep games of one section together.
+    const char* section;
     const char* title;
     const char* description;
     const char* binaryPath;  // absolute path to the game executable
@@ -49,25 +52,18 @@ struct GameEntry
 static const GameEntry GAMES[] =
 {
     {
-        "Wizards",
-        "Explore the wizard's world.",
-        // The folder is ely-arcade-wizards-1, but the binary is named wizards1.
-        "games/ely-arcade-wizards-1/bin/Release/wizards1" GAME_EXE_EXT
-    },
-    {
-        "Thick Cube",
-        "A 3D cube with holes on every face.",
-        "games/game-thick-cube/bin/Release/game-thick-cube" GAME_EXE_EXT
-    },
-    {
-        "Edibles",
+        "",
+        "Snake",
         "A snake game for one or two players.",
+        // The game's repo and binary are still called edibles-raylib.
         "games/edibles-raylib/bin/Release/edibles-raylib" GAME_EXE_EXT
     },
     {
-        "Map Browser",
-        "Preview a Tiled-based game map.",
-        "games/ely-arcade-map-browser/bin/Release/ely-arcade-map-browser" GAME_EXE_EXT
+        "Unfinished Games",
+        "Wizards of the West",
+        "Explore the wizard's world.",
+        // The folder is ely-arcade-wizards-1, but the binary is named wizards1.
+        "games/ely-arcade-wizards-1/bin/Release/wizards1" GAME_EXE_EXT
     },
 };
 static const int GAME_COUNT = (int)(sizeof(GAMES) / sizeof(GAMES[0]));
@@ -163,6 +159,31 @@ static float PulseAlpha(float t)
     return 0.55f + 0.45f * sinf(t * 3.14159f);
 }
 
+// ---------------------------------------------------------------------------
+// Fonts
+// The menu font (resources/fonts/Inter-VariableFont_opsz,wght.ttf) is not tracked in git, so
+// it is often missing. A failed LoadFontEx returns an EMPTY font: MeasureTextEx then returns
+// 0 x 0 while DrawTextEx silently draws with raylib's built-in font, so everything laid out
+// from the measured size (e.g. the line under the title) lands on top of the text. Fall back
+// to the built-in font explicitly, so measuring and drawing always use the same font.
+// ---------------------------------------------------------------------------
+
+static const char* MENU_FONT = "resources/fonts/Inter-VariableFont_opsz,wght.ttf";
+
+static Font LoadMenuFont(int size)
+{
+    Font font = LoadFontEx(MENU_FONT, size, 0, 0);
+    if (font.texture.id == 0)
+        return GetFontDefault();
+    return font;
+}
+
+static void UnloadMenuFont(Font font)
+{
+    if (font.texture.id != GetFontDefault().texture.id)
+        UnloadFont(font);
+}
+
 
 // ---------------------------------------------------------------------------
 // Main
@@ -182,9 +203,10 @@ int main(void)
     ChangeDirectory("../..");
 
     // Load font at three sizes (falls back to raylib's default font if missing).
-    Font titleFont = LoadFontEx("resources/fonts/Inter-VariableFont_opsz,wght.ttf", 72, 0, 0);
-    Font itemFont  = LoadFontEx("resources/fonts/Inter-VariableFont_opsz,wght.ttf", 36, 0, 0);
-    Font hintFont  = LoadFontEx("resources/fonts/Inter-VariableFont_opsz,wght.ttf", 24, 0, 0);
+    Font titleFont = LoadMenuFont(72);
+    Font itemFont  = LoadMenuFont(36);
+    Font hintFont  = LoadMenuFont(24);
+    Font sectFont  = LoadMenuFont(28);
 
     // State
     int selectedIndex = 0;
@@ -197,6 +219,7 @@ int main(void)
     Color itemSel  = { 255, 255, 255, 255 };  // bright white (selected)
     Color hintCol  = { 130, 130, 150, 255 };  // dim grey footer
     Color hlBox    = {  80, 160, 255, 255 };  // blue selection box
+    Color headRule = { 255, 200,  50,  90 };  // faint gold rule beside section headings
 
     while (!WindowShouldClose())
     {
@@ -241,19 +264,44 @@ int main(void)
         Vector2 titlePos  = { (W - titleSize.x) * 0.5f, 80.0f };
         DrawTextEx(titleFont, titleText, titlePos, 72, 2, titleCol);
 
-        // Decorative separator line under title
-        int lineY = (int)(titlePos.y + titleSize.y + 20);
+        // Decorative separator line under the title, 24 px below the text's bottom edge. The
+        // title is measured with the same font it is drawn with (see LoadMenuFont), so the
+        // line can no longer land on top of the text.
+        int lineY = (int)(titlePos.y + titleSize.y + 24);
         DrawRectangle(W/2 - 200, lineY, 400, 3, titleCol);
 
-        // Game list layout constants
+        // Game list layout. Each game is one row. A heading row is added above the first
+        // game of every named section (GameEntry::section); rows are placed top to bottom.
         const int ITEM_H     = 90;
+        const int HEADING_H  = 64;
         const int LIST_TOP   = lineY + 40;
         const int ITEM_PAD_X = 60;
         const int ITEM_W     = W - ITEM_PAD_X * 2;
 
+        int rowY = LIST_TOP;
+        const char* lastSection = "";
         for (int i = 0; i < GAME_COUNT; ++i)
         {
-            int itemY  = LIST_TOP + i * ITEM_H;
+            // Section heading: centred text with a thin rule on each side.
+            if (strcmp(GAMES[i].section, lastSection) != 0)
+            {
+                lastSection = GAMES[i].section;
+                if (lastSection[0] != '\0')
+                {
+                    rowY += 20;   // breathing room between the previous game's box and the heading
+                    Vector2 hs = MeasureTextEx(sectFont, lastSection, 28, 2);
+                    float hx   = (W - hs.x) * 0.5f;
+                    int midY   = rowY + (int)(hs.y * 0.5f);
+                    DrawTextEx(sectFont, lastSection, { hx, (float)rowY }, 28, 2, titleCol);
+                    DrawRectangle(ITEM_PAD_X, midY, (int)(hx - 20 - ITEM_PAD_X), 1, headRule);
+                    DrawRectangle((int)(hx + hs.x + 20), midY,
+                                  (int)(W - ITEM_PAD_X - (hx + hs.x + 20)), 1, headRule);
+                    rowY += HEADING_H;
+                }
+            }
+
+            int itemY  = rowY;
+            rowY      += ITEM_H;
             bool isSel = (i == selectedIndex);
 
             // Selection highlight box
@@ -295,9 +343,10 @@ int main(void)
         EndDrawing();
     }
 
-    UnloadFont(hintFont);
-    UnloadFont(itemFont);
-    UnloadFont(titleFont);
+    UnloadMenuFont(sectFont);
+    UnloadMenuFont(hintFont);
+    UnloadMenuFont(itemFont);
+    UnloadMenuFont(titleFont);
     CloseWindow();
     return 0;
 }
