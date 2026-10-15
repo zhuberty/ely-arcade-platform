@@ -287,6 +287,29 @@ All of these live in `sdk/premake/arcade_sdk.lua`, so a change there applies to 
 - Bump the SDK for a game: pull inside `games/<name>/sdk`, commit the new SDK pointer in the game repo, push, then bump the game here. Skipping the push or the final commit here leaves the platform pointing at the old version.
 - `docs/ARCADE_SETUP_PLAN.md` is a historical record of the machine setup. Its "Adding a real game later" steps (`define_game_project`) are outdated. Use "Adding a game" above.
 
+## Settings menu (Wi-Fi and updates)
+
+The last entry of the menu is **Settings**, usable with the joystick and buttons alone (a USB keyboard also works):
+
+- **Wi-Fi**: networks in range, an on-screen keyboard for the password, hidden networks, forget / new password.
+  `scripts/wifi.sh` drives `nmcli` (the password goes over stdin, never on a command line). The account that runs the
+  menu must be in the `netdev` group.
+- **Updates**: the installed version, whether an update is ready, "Check now" and "Restart now". The update service
+  itself lives in [ely-arcade-fai](https://github.com/zhuberty/ely-arcade-fai); the menu only reads
+  `/var/lib/ely-arcade-update/status` and asks systemd to start `ely-arcade-update.service` or reboot.
+- The corner of the main menu shows the network and "Update ready: restart to install".
+
+| Path | What |
+|---|---|
+| `src/settings.cpp`, `src/wifi_screen.cpp` | Settings screens, background polling of network/update state |
+| `src/ui.cpp`, `src/keyboard.cpp` | Shared drawing + input, on-screen keyboard |
+| `src/netinfo.cpp`, `src/process.cpp` | `nmcli` / status-file parsers, non-blocking command runner (no raylib) |
+| `scripts/wifi.sh` | Join / forget a network |
+| `scripts/test.sh`, `tests/` | Unit tests for the parts above (`scripts/test.sh`, needs only g++) |
+
+On a development PC without NetworkManager the screens say so; `ELY_ARCADE_STATUS=<file>` points the menu at a made-up
+update status file.
+
 ## Notes
 
 - `resources/fonts/Inter-VariableFont_opsz,wght.ttf` was never tracked in the old repo. Add it if you want the menu font (otherwise raylib's default font is used).

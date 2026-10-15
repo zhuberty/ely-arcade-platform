@@ -12,6 +12,8 @@
 
 #include "raylib.h"
 #include "arcade_input.h"
+#include "settings.h"
+#include "ui.h"
 
 #include <cmath>
 #include <cstdio>
@@ -67,6 +69,10 @@ static const GameEntry GAMES[] =
     },
 };
 static const int GAME_COUNT = (int)(sizeof(GAMES) / sizeof(GAMES[0]));
+
+// The list the player scrolls through is the games followed by one more entry: Settings (Wi-Fi and
+// software updates, see settings.h). Its index is GAME_COUNT.
+static const int ENTRY_COUNT = GAME_COUNT + 1;
 
 // ---------------------------------------------------------------------------
 // Launch a game as a child process; block until it exits.
@@ -208,6 +214,10 @@ int main(void)
     Font hintFont  = LoadMenuFont(24);
     Font sectFont  = LoadMenuFont(28);
 
+    // The settings screens draw with the same fonts, and look in the platform root for scripts/.
+    ui::SetFonts(titleFont, itemFont, hintFont);
+    settings::Init(GetWorkingDirectory());
+
     // State
     int selectedIndex = 0;
 
@@ -229,15 +239,22 @@ int main(void)
         // what makes "pressed" work for the encoder buttons.
         arcade::UpdateInput();
 
+        settings::Update();   // network and update status, polled in the background
+
         if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Down))
-            selectedIndex = (selectedIndex + 1) % GAME_COUNT;
+            selectedIndex = (selectedIndex + 1) % ENTRY_COUNT;
 
         if (arcade::IsActionPressed(arcade::Player::Any, arcade::Action::Up))
-            selectedIndex = (selectedIndex - 1 + GAME_COUNT) % GAME_COUNT;
+            selectedIndex = (selectedIndex - 1 + ENTRY_COUNT) % ENTRY_COUNT;
 
         if (ConfirmPressed())
-            LaunchGame(GAMES[selectedIndex]);
-            // After game exits, execution resumes here and the loop continues
+        {
+            if (selectedIndex == GAME_COUNT)
+                settings::Run();                  // returns when the player leaves the settings
+            else
+                LaunchGame(GAMES[selectedIndex]);
+            // After the game (or the settings) exits, execution resumes here and the loop continues
+        }
 
         // Draw
         BeginDrawing();
@@ -333,8 +350,30 @@ int main(void)
                        24, 1, descCol);
         }
 
+        // The last entry: Settings
+        {
+            int itemY  = rowY;
+            bool isSel = (selectedIndex == GAME_COUNT);
+            if (isSel)
+            {
+                float a = PulseAlpha(now);
+                Color boxCol    = { hlBox.r, hlBox.g, hlBox.b, (unsigned char)(a * 60) };
+                Color borderCol = { hlBox.r, hlBox.g, hlBox.b, (unsigned char)(a * 200) };
+                DrawRectangle(ITEM_PAD_X, itemY, ITEM_W, ITEM_H - 10, boxCol);
+                DrawRectangleLines(ITEM_PAD_X, itemY, ITEM_W, ITEM_H - 10, borderCol);
+                DrawTextEx(itemFont, ">", { (float)(ITEM_PAD_X + 10), (float)(itemY + 14) }, 36, 1, hlBox);
+            }
+            Color nameCol = isSel ? itemSel : itemNorm;
+            DrawTextEx(itemFont, "Settings", { (float)(ITEM_PAD_X + 50), (float)(itemY + 10) }, 36, 1, nameCol);
+            Color descCol = { nameCol.r, nameCol.g, nameCol.b, 180 };
+            DrawTextEx(hintFont, "Wi-Fi and software updates.", { (float)(ITEM_PAD_X + 50), (float)(itemY + 52) }, 24, 1, descCol);
+        }
+
+        // Network / update status, top right
+        settings::DrawStatus(W);
+
         // Footer control hints
-        const char* hintText = "JOYSTICK   choose       ANY BUTTON   launch game";
+        const char* hintText = "JOYSTICK   choose       ANY BUTTON   select";
         Vector2 hintSize = MeasureTextEx(hintFont, hintText, 24, 1);
         DrawTextEx(hintFont, hintText,
                    { (W - hintSize.x) * 0.5f, (float)(H - 50) },
